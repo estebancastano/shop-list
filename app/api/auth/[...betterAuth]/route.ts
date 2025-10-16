@@ -1,5 +1,23 @@
-import { auth } from "@/lib/auth";
-export default auth.handler;
+import { betterAuth } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import prisma from "@/lib/prisma";
 
-console.log("Servidor BASE URL:", process.env.BETTER_AUTH_URL);
-console.log("Cliente BASE URL:", process.env.NEXT_PUBLIC_BETTER_AUTH_URL);
+const auth = betterAuth({
+    database: prismaAdapter(prisma, {
+        provider: "postgresql",
+    }),
+    socialProviders: {
+        google: {
+            clientId: process.env.GOOGLE_CLIENT_ID!,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        },
+    },
+    emailAndPassword: {
+        enabled: true,
+        autoSignIn: false,
+    },
+});
+
+// ✅ NUEVA FORMA (v1.3.x en adelante)
+export const GET = auth.handler;
+export const POST = auth.handler;
