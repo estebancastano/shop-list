@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-// 🔹 Obtener una lista
+// 🔹 Obtener una lista por ID
 export async function GET(req: Request, { params }: { params: { id: string } }) {
     try {
         const list = await prisma.list.findUnique({
@@ -34,5 +34,24 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     } catch (error) {
         console.error("Error al actualizar lista:", error);
         return NextResponse.json({ error: "Error al actualizar lista" }, { status: 500 });
+    }
+}
+
+// 🔹 Eliminar una lista
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+    try {
+        const { id } = params;
+
+        const deletedList = await prisma.list.delete({
+            where: { id },
+        });
+
+        return NextResponse.json({
+            message: "Lista eliminada correctamente",
+            deletedList,
+        });
+    } catch (error) {
+        console.error("Error al eliminar lista:", error);
+        return NextResponse.json({ error: "Error al eliminar lista" }, { status: 500 });
     }
 }
