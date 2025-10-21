@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 
 // 🔹 Actualizar un ítem
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const { id } = params;
+        const { id } = await params; // ✅ Esperar los params
         const data = await req.json();
 
         const updatedItem = await prisma.item.update({
@@ -20,9 +20,9 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 }
 
 // 🔹 Eliminar un ítem
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const { id } = params;
+        const { id } = await params; // ✅ Esperar los params
 
         await prisma.item.delete({
             where: { id },
