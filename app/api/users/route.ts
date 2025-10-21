@@ -5,7 +5,7 @@ import { authClient } from "@/lib/auth-client"; // el cliente BetterAuth que tie
 export async function PUT(req: NextRequest) {
     try {
         // 🔹 Obtener la sesión del usuario logueado
-        const sessionResponse = await authClient.getSession({ req });
+        const sessionResponse = await authClient.getSession();
         const { data, error } = sessionResponse;
 
         if (error) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
