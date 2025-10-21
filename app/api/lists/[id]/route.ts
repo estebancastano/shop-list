@@ -1,11 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 
 // 🔹 Obtener una lista por ID
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id } = await params; // ✅ importante
         const list = await prisma.list.findUnique({
-            where: { id: params.id },
+            where: { id },
         });
 
         if (!list) {
@@ -20,9 +21,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 }
 
 // 🔹 Actualizar nombre de la lista
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const { id } = params;
+        const { id } = await params; // ✅ importante
         const { title } = await req.json();
 
         const updatedList = await prisma.list.update({
@@ -38,9 +39,9 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 }
 
 // 🔹 Eliminar una lista
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const { id } = params;
+        const { id } = await params; // ✅ importante
 
         const deletedList = await prisma.list.delete({
             where: { id },
