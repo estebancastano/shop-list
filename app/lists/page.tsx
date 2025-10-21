@@ -97,6 +97,7 @@ export default function ListasPage() {
                                             e.stopPropagation(); // evita que también navegue al hacer clic en eliminar
                                             eliminarLista(lista.id);
                                         }}
+                                        className="text-white"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </Button>

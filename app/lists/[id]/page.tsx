@@ -14,7 +14,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Edit } from "lucide-react";
+import { Plus, Trash2, Edit, FileDown } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface Item {
     id: string;
@@ -24,17 +26,19 @@ interface Item {
     bought: boolean;
 }
 
+interface Lista {
+    title: string;
+    items: Item[];
+}
+
 export default function ListaDetallePage() {
     const { id } = useParams();
     const [items, setItems] = useState<Item[]>([]);
     const [list, setList] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    // 🔹 Modal para agregar ítem
     const [openAdd, setOpenAdd] = useState(false);
-    // 🔹 Modal para editar lista
     const [openEditList, setOpenEditList] = useState(false);
-    // 🔹 Modal para editar ítem
     const [openEditItem, setOpenEditItem] = useState(false);
 
     const [newItem, setNewItem] = useState({
@@ -46,7 +50,6 @@ export default function ListaDetallePage() {
     const [editItem, setEditItem] = useState<Item | null>(null);
     const [newListTitle, setNewListTitle] = useState("");
 
-    // 🔹 Cargar lista e ítems
     useEffect(() => {
         async function fetchData() {
             try {
@@ -71,7 +74,6 @@ export default function ListaDetallePage() {
         if (id) fetchData();
     }, [id]);
 
-    // ➕ Agregar nuevo ítem
     const agregarItem = async () => {
         if (!newItem.name || !newItem.quantity)
             return alert("Por favor completa todos los campos.");
@@ -92,7 +94,6 @@ export default function ListaDetallePage() {
         }
     };
 
-    // ✏️ Editar nombre de la lista
     const handleEditListName = async () => {
         if (!newListTitle.trim()) return alert("El nombre no puede estar vacío.");
 
@@ -111,7 +112,6 @@ export default function ListaDetallePage() {
         }
     };
 
-    // ✏️ Editar ítem
     const handleEditItem = async () => {
         if (!editItem) return;
 
@@ -135,7 +135,6 @@ export default function ListaDetallePage() {
         }
     };
 
-    // 🗑️ Eliminar ítem
     const eliminarItem = async (itemId: string) => {
         const res = await fetch(`/api/items/${itemId}`, { method: "DELETE" });
         if (res.ok) {
@@ -145,6 +144,63 @@ export default function ListaDetallePage() {
         }
     };
 
+    // 🧾 Exportar a PDF
+    const exportarPDF = () => {
+        // ✅ Comprobamos que haya título e ítems
+        if (!list || items.length === 0) {
+            console.warn("⚠️ No hay datos para exportar");
+            return;
+        }
+
+        const doc = new jsPDF();
+
+        // Título del documento
+        doc.setFontSize(16);
+        doc.text(list.title || "Lista de compras", 10, 15);
+
+        // Convertimos los ítems a filas válidas para la tabla
+        const rows = items.map((item, index) => [
+            (index + 1).toString(), // índice
+            item.quantity ?? "",
+            item.name ?? ""
+            
+        ]);
+
+        console.log("🧾 Exportando filas:", rows); // 👀 Verás los datos en consola
+
+        // 📋 Agregamos la tabla
+        autoTable(doc, {
+            startY: 25,
+            head: [["#", "Cantidad", "Nombre"]],
+            body: rows,
+            theme: "grid", // da líneas suaves
+            headStyles: {
+                fillColor: [30, 144, 255], // 🔵 Azul (RGB)
+                textColor: [255, 255, 255], // Blanco
+                fontStyle: "bold",
+            },
+            bodyStyles: {
+                fillColor: [245, 245, 245], // 🩶 Gris claro
+                textColor: [0, 0, 0],
+            },
+            styles: {
+                fontSize: 11,
+                cellPadding: 3,
+            },
+            alternateRowStyles: {
+                fillColor: [255, 255, 255], // Blanco para alternar filas
+            },
+            columnStyles: {
+                0: { halign: "center", cellWidth: 15 }, // #
+                1: { halign: "center", cellWidth: 25 }, // Cantidad
+                2: { halign: "left" },                  // Nombre
+            },
+            margin: { left: 10, right: 10 },
+        });
+
+        // Descargamos el archivo PDF
+        doc.save(`${list.title || "lista"}.pdf`);
+    };
     if (loading) return <p className="text-center mt-10">Cargando...</p>;
 
     return (
@@ -156,7 +212,16 @@ export default function ListaDetallePage() {
                     </CardTitle>
 
                     <div className="flex gap-2">
-                        {/* ✏️ Editar nombre de lista */}
+                        {/* 📄 Exportar PDF */}
+                        <Button
+                            onClick={exportarPDF}
+                            variant="outline"
+                            className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                        >
+                            <FileDown className="w-4 h-4 mr-1" /> Exportar PDF
+                        </Button>
+
+                        {/* ✏️ Editar nombre */}
                         <Dialog open={openEditList} onOpenChange={setOpenEditList}>
                             <DialogTrigger asChild>
                                 <Button variant="ghost" className="text-blue-600">
@@ -201,10 +266,7 @@ export default function ListaDetallePage() {
                                         <Input
                                             value={newItem.name}
                                             onChange={(e) =>
-                                                setNewItem({
-                                                    ...newItem,
-                                                    name: e.target.value,
-                                                })
+                                                setNewItem({ ...newItem, name: e.target.value })
                                             }
                                             placeholder="Ej. Arroz, Leche, Tomates"
                                         />
@@ -215,10 +277,7 @@ export default function ListaDetallePage() {
                                         <Input
                                             value={newItem.quantity}
                                             onChange={(e) =>
-                                                setNewItem({
-                                                    ...newItem,
-                                                    quantity: e.target.value,
-                                                })
+                                                setNewItem({ ...newItem, quantity: e.target.value })
                                             }
                                             placeholder="Ej. 2 kg, 1 litro, ½ libra"
                                         />
@@ -229,10 +288,7 @@ export default function ListaDetallePage() {
                                         <Input
                                             value={newItem.category}
                                             onChange={(e) =>
-                                                setNewItem({
-                                                    ...newItem,
-                                                    category: e.target.value,
-                                                })
+                                                setNewItem({ ...newItem, category: e.target.value })
                                             }
                                             placeholder="Ej. Granos, Lácteos, Verduras"
                                         />
@@ -286,7 +342,7 @@ export default function ListaDetallePage() {
                                             size="sm"
                                             onClick={() => eliminarItem(item.id)}
                                         >
-                                            <Trash2 className="w-4 h-4" />
+                                            <Trash2 className="w-4 h-4 text-white" />
                                         </Button>
                                     </div>
                                 </li>
@@ -322,10 +378,7 @@ export default function ListaDetallePage() {
                                 <Input
                                     value={editItem.quantity}
                                     onChange={(e) =>
-                                        setEditItem({
-                                            ...editItem,
-                                            quantity: e.target.value,
-                                        })
+                                        setEditItem({ ...editItem, quantity: e.target.value })
                                     }
                                 />
                             </div>
@@ -334,10 +387,7 @@ export default function ListaDetallePage() {
                                 <Input
                                     value={editItem.category || ""}
                                     onChange={(e) =>
-                                        setEditItem({
-                                            ...editItem,
-                                            category: e.target.value,
-                                        })
+                                        setEditItem({ ...editItem, category: e.target.value })
                                     }
                                 />
                             </div>

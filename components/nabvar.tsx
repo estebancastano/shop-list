@@ -1,14 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart, ListTodo, User, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "./ui/button";
+import {
+    ShoppingCart,
+    ListTodo,
+    User,
+    LogOut,
+    Menu,
+    X,
+} from "lucide-react";
 
 export function Navbar() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [menuOpen, setMenuOpen] = useState(false);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -24,46 +32,127 @@ export function Navbar() {
         window.location.href = "/";
     };
 
-    return (
-        <header className="flex justify-between items-center px-6 py-4 bg-white shadow-sm sticky top-0 z-10">
-            <Link href="/" className="flex items-center gap-2 text-lg font-semibold hover:text-blue-600 transition">
-                <ShoppingCart className="w-5 h-5 text-blue-600" />
-                Lista de Compras
-            </Link>
+    const toggleMenu = () => setMenuOpen(!menuOpen);
 
-            <nav className="flex gap-6 text-sm font-medium">
-                {isAuthenticated && (
-                    <>
-                        <Link href="/lists" className="text-gray-700 hover:text-blue-600 flex items-center gap-1">
-                            <ListTodo className="w-4 h-4" />
-                            Mis Listas
-                        </Link>
-                        <Link href="/profile" className="text-gray-700 hover:text-blue-600 flex items-center gap-1">
-                            <User className="w-4 h-4" />
-                            Perfil
-                        </Link>
-                    </>
-                )}
-                
-                {!isLoading && (
-                    <>
-                        {isAuthenticated ? (
-                            <Button 
-                                onClick={handleSignOut}
-                                variant="destructive"
-                                className="text-white"
+    return (
+        <header className="w-full bg-white shadow-sm sticky top-0 z-20">
+            <div className="flex justify-between items-center px-4 sm:px-6 py-3">
+                {/* 🛒 Logo */}
+                <Link
+                    href="/"
+                    className="flex items-center gap-2 text-base sm:text-lg font-semibold hover:text-blue-600 transition-colors"
+                >
+                    <ShoppingCart className="w-5 h-5 text-blue-600" />
+                    Lista de Compras
+                </Link>
+
+                {/* 🍔 Botón menú (solo móvil) */}
+                <button
+                    className="sm:hidden text-gray-700 hover:text-blue-600 transition"
+                    onClick={toggleMenu}
+                >
+                    {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                </button>
+
+                {/* 🧭 Navegación desktop */}
+                <nav className="hidden sm:flex gap-6 text-sm font-medium items-center">
+                    {isAuthenticated && (
+                        <>
+                            <Link
+                                href="/lists"
+                                className="text-gray-700 hover:text-blue-600 flex items-center gap-1"
                             >
-                                <LogOut className="w-4 h-4" />
-                                Cerrar sesión
-                            </Button>
-                        ) : (
-                            <Link href="/login" className="text-gray-700 hover:text-blue-600">
-                                Iniciar sesión
+                                <ListTodo className="w-4 h-4" />
+                                Mis Listas
                             </Link>
+                            <Link
+                                href="/profile"
+                                className="text-gray-700 hover:text-blue-600 flex items-center gap-1"
+                            >
+                                <User className="w-4 h-4" />
+                                Perfil
+                            </Link>
+                        </>
+                    )}
+
+                    {!isLoading && (
+                        <>
+                            {isAuthenticated ? (
+                                <Button
+                                    onClick={handleSignOut}
+                                    variant="destructive"
+                                    className="text-white flex items-center gap-1"
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                    Cerrar sesión
+                                </Button>
+                            ) : (
+                                <Link
+                                    href="/login"
+                                    className="text-gray-700 hover:text-blue-600 transition-colors"
+                                >
+                                    Iniciar sesión
+                                </Link>
+                            )}
+                        </>
+                    )}
+                </nav>
+            </div>
+
+            {/* 📱 Menú móvil desplegable */}
+            {menuOpen && (
+                <div className="sm:hidden border-t border-gray-200 bg-white shadow-inner">
+                    <nav className="flex flex-col p-4 space-y-3 text-sm font-medium">
+                        {isAuthenticated && (
+                            <>
+                                <Link
+                                    href="/lists"
+                                    className="text-gray-700 hover:text-blue-600 flex items-center gap-2"
+                                    onClick={() => setMenuOpen(false)}
+                                >
+                                    <ListTodo className="w-4 h-4" />
+                                    Mis Listas
+                                </Link>
+                                <Link
+                                    href="/profile"
+                                    className="text-gray-700 hover:text-blue-600 flex items-center gap-2"
+                                    onClick={() => setMenuOpen(false)}
+                                >
+                                    <User className="w-4 h-4" />
+                                    Perfil
+                                </Link>
+                            </>
                         )}
-                    </>
-                )}
-            </nav>
+
+                        {!isLoading && (
+                            <>
+                                {isAuthenticated ? (
+                                    <Button
+                                        onClick={() => {
+                                            handleSignOut();
+                                            setMenuOpen(false);
+                                        }}
+                                        variant="destructive"
+                                        className="w-full flex items-center justify-center gap-2 text-white"
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                        Cerrar sesión
+                                    </Button>
+                                ) : (
+                                    <Link
+                                        href="/login"
+                                        onClick={() => setMenuOpen(false)}
+                                        className="text-gray-700 hover:text-blue-600 flex items-center gap-2"
+                                    >
+                                        <User className="w-4 h-4" />
+                                        Iniciar sesión
+                                    </Link>
+                                )}
+                            </>
+                        )}
+                    </nav>
+                </div>
+            )}
         </header>
     );
 }
