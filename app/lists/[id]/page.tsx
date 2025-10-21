@@ -27,6 +27,7 @@ interface Item {
 }
 
 interface Lista {
+    id?: string;
     title: string;
     items: Item[];
 }
@@ -34,7 +35,7 @@ interface Lista {
 export default function ListaDetallePage() {
     const { id } = useParams();
     const [items, setItems] = useState<Item[]>([]);
-    const [list, setList] = useState<any>(null);
+    const [list, setList] = useState<Lista | null>(null);
     const [loading, setLoading] = useState(true);
 
     const [openAdd, setOpenAdd] = useState(false);
@@ -96,6 +97,7 @@ export default function ListaDetallePage() {
 
     const handleEditListName = async () => {
         if (!newListTitle.trim()) return alert("El nombre no puede estar vacío.");
+        if (!list) return alert("Lista no está cargada aún.");
 
         const res = await fetch(`/api/lists/${list.id}`, {
             method: "PATCH",
