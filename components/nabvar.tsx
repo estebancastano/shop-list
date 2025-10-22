@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "./ui/button";
+import { useTheme } from "@/app/hooks/useTheme";
 import {
     ShoppingCart,
     ListTodo,
@@ -11,12 +12,17 @@ import {
     LogOut,
     Menu,
     X,
+    Moon,
+    Sun
 } from "lucide-react";
 
 export function Navbar() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [menuOpen, setMenuOpen] = useState(false);
+    const { isDark, toggleTheme } = useTheme();
+
+
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -35,16 +41,26 @@ export function Navbar() {
     const toggleMenu = () => setMenuOpen(!menuOpen);
 
     return (
-        <header className="w-full bg-white shadow-sm sticky top-0 z-20">
+        <header className="w-full bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-20">
             <div className="flex justify-between items-center px-4 sm:px-6 py-3">
                 {/* 🛒 Logo */}
                 <Link
                     href="/"
-                    className="flex items-center gap-2 text-base sm:text-lg font-semibold hover:text-blue-600 transition-colors"
+                    className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
                 >
                     <ShoppingCart className="w-5 h-5 text-blue-600" />
                     Lista de Compras
                 </Link>
+
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={toggleTheme}
+                    className="text-gray-700 hover:text-blue-600 dark:text-gray-200 dark:hover:text-yellow-400 transition"
+                >
+                    {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                </Button>
+
 
                 {/* 🍔 Botón menú (solo móvil) */}
                 <button
