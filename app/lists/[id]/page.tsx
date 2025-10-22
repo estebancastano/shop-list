@@ -165,7 +165,7 @@ export default function ListaDetallePage() {
             (index + 1).toString(), // índice
             item.quantity ?? "",
             item.name ?? ""
-            
+
         ]);
 
         console.log("🧾 Exportando filas:", rows); // 👀 Verás los datos en consola
@@ -208,17 +208,17 @@ export default function ListaDetallePage() {
     return (
         <section className="max-w-3xl mx-auto mt-10">
             <Card className="shadow-md">
-                <CardHeader className="flex justify-between items-center">
-                    <CardTitle className="text-2xl font-semibold text-blue-600">
+                <CardHeader className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                    <CardTitle className="text-2xl font-semibold text-blue-600 text-center sm:text-left">
                         {list?.title || "Lista sin título"} 🛒
                     </CardTitle>
 
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap justify-center sm:justify-end gap-2">
                         {/* 📄 Exportar PDF */}
                         <Button
                             onClick={exportarPDF}
                             variant="outline"
-                            className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                            className="text-blue-600 border-blue-600 hover:bg-blue-50 w-full sm:w-auto"
                         >
                             <FileDown className="w-4 h-4 mr-1" /> Exportar PDF
                         </Button>
@@ -226,7 +226,10 @@ export default function ListaDetallePage() {
                         {/* ✏️ Editar nombre */}
                         <Dialog open={openEditList} onOpenChange={setOpenEditList}>
                             <DialogTrigger asChild>
-                                <Button variant="ghost" className="text-blue-600">
+                                <Button
+                                    variant="ghost"
+                                    className="text-blue-600 w-full sm:w-auto border sm:border-none"
+                                >
                                     <Edit className="w-4 h-4 mr-1" /> Editar nombre
                                 </Button>
                             </DialogTrigger>
@@ -251,7 +254,7 @@ export default function ListaDetallePage() {
                         {/* ➕ Agregar ítem */}
                         <Dialog open={openAdd} onOpenChange={setOpenAdd}>
                             <DialogTrigger asChild>
-                                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                                <Button className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto">
                                     <Plus className="w-4 h-4 mr-2" />
                                     Nuevo ítem
                                 </Button>
