@@ -1,12 +1,15 @@
-// hooks/useTheme.ts
+"use client";
 import { useEffect, useState } from "react";
 
 export function useTheme() {
     const [isDark, setIsDark] = useState(false);
 
     useEffect(() => {
-        if (localStorage.theme === "dark" ||
-            (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+        // 🔹 Detectar el tema guardado o el del sistema
+        const stored = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+        if (stored === "dark" || (!stored && prefersDark)) {
             document.documentElement.classList.add("dark");
             setIsDark(true);
         } else {
@@ -16,13 +19,9 @@ export function useTheme() {
     }, []);
 
     const toggleTheme = () => {
-        if (isDark) {
-            document.documentElement.classList.remove("dark");
-            localStorage.theme = "light";
-        } else {
-            document.documentElement.classList.add("dark");
-            localStorage.theme = "dark";
-        }
+        const newTheme = isDark ? "light" : "dark";
+        localStorage.setItem("theme", newTheme);
+        document.documentElement.classList.toggle("dark", newTheme === "dark");
         setIsDark(!isDark);
     };
 
